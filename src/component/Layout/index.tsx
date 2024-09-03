@@ -7,15 +7,16 @@ import { localStorageMixins } from "@/utils/localStorageMixins";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname === "/login") {
-    return children;
-  }
   useEffect(() => {
     const access_token = localStorageMixins.get(`access_token`);
     if (!access_token && !pathname.includes(`/login`)) {
       redirect("/login");
     }
   }, []);
+  if (pathname === "/login") {
+    return children;
+  }
+
   return (
     <div className={`w-full`}>
       <Navbar />
