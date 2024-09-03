@@ -1,0 +1,25 @@
+export const toTitleCase = (str: string) => {
+  // Replace underscores with spaces and convert to lowercase
+  const normalized = str.replace(/_/g, " ").toLowerCase();
+
+  // Split the string into words
+  const words = normalized.split(/\s+/);
+
+  // Capitalize the first letter of each word
+  const titleCased = words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  return titleCased;
+};
+
+export const translateColorChips = (status: string) => {
+  switch (status) {
+    case "active":
+      return "success";
+    case "inactive":
+      return "error";
+    default:
+      return "default";
+  }
+};
