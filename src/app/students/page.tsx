@@ -1,5 +1,7 @@
 "use client";
 import UsersCard from "@/component/UsersCard";
+import { getStudents } from "@/service/students";
+import { useRequest } from "ahooks";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +16,8 @@ export default function Students() {
   const pushCreate = () => {
     router.push(`/students/create`);
   };
+
+  const { data, run } = useRequest(getStudents);
 
   return (
     <div className={`flex flex-col gap-6 w-full h-full pb-28`}>
@@ -79,38 +83,17 @@ export default function Students() {
       </button>
       {/* Cards */}
       <div className={`flex flex-col gap-3`}>
-        <UsersCard
-          onClick={() => {
-            router.push(`/students/0x`);
-          }}
-          fullname={"Jerrie Jayadi"}
-          gender={"male"}
-          status={`active`}
-        />
-        <UsersCard
-          onClick={() => {
-            router.push(`/students/0x`);
-          }}
-          fullname={"Johana"}
-          gender={"female"}
-          status={`active`}
-        />
-        <UsersCard
-          onClick={() => {
-            router.push(`/students/0x`);
-          }}
-          fullname={"Jerrie Jayadi"}
-          gender={"male"}
-          status={`inactive`}
-        />
-        <UsersCard
-          onClick={() => {
-            router.push(`/students/0x`);
-          }}
-          fullname={"Kevin Chandra"}
-          gender={"male"}
-          status={`active`}
-        />
+        {data?.result.map((rows, index) => (
+          <UsersCard
+            key={`students-${index + 1}`}
+            onClick={() => {
+              router.push(`/students/${rows.id}`);
+            }}
+            fullname={rows.fullname}
+            gender={rows.gender}
+            status={rows.status}
+          />
+        ))}
       </div>
     </div>
   );

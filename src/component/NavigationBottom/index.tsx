@@ -44,7 +44,7 @@ export default function NavigationBottom() {
 
         <p className={`text-xs mt-1`}>Students</p>
       </Link>
-      <Link
+      {/* <Link
         href={`/attendance`}
         className={`flex flex-col items-center justify-center aspect-square ${
           path === "/attendance" && "text-dark-primary "
@@ -57,7 +57,7 @@ export default function NavigationBottom() {
         )}
 
         <p className={`text-xs mt-1`}>Attendance</p>
-      </Link>
+      </Link> */}
     </div>
   );
 }

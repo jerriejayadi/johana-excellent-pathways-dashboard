@@ -3,38 +3,41 @@ import AddAttendanceModal from "@/component/AddAttendanceModal";
 import Chip from "@/component/Chip";
 import Input from "@/component/Input";
 import Modal from "@/component/Modal";
+import { getStudentsDetail } from "@/service/students";
 import { translateColorChips, toTitleCase } from "@/utils";
+import { useRequest } from "ahooks";
 import Image from "next/image";
-import { useState } from "react";
-import { BiChevronDown, BiChevronUp } from "react-icons/bi";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { BiChevronDown, BiChevronUp, BiEdit } from "react-icons/bi";
 import { PiPlusBold } from "react-icons/pi";
 
-export default function StudentDetail() {
+export default function StudentDetail({ params }: { params: { id: string } }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [attendanceModal, setAttendanceModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const data = {
-    fullname: "Jerrie Jayadi",
-    gender: "male",
-    status: "active",
-  };
+  const { data, run } = useRequest(getStudentsDetail, { manual: true });
+  useEffect(() => {
+    run(params.id);
+  }, []);
 
   return (
     <div className={`w-full flex flex-col gap-6 pb-28`}>
       {/* Profile */}
-      <div className={`bg-dark-surface w-full px-4 py-3 rounded-lg`}>
+      <div className={`bg-dark-surface w-full p-4 rounded-lg`}>
         <div className={`flex items-center gap-4 shrink-0`}>
           <Image
             alt={``}
             src={
-              data.gender === "male" ? `/icons/male.png` : `/icons/female.png`
+              data?.gender === "male" ? `/icons/male.png` : `/icons/female.png`
             }
             className={`size-14 shrink-0`}
             width={1000}
             height={1000}
           />
           <div className={`w-full`}>
-            <p className={`text-2xl font-bold`}>{data.fullname}</p>
+            <p className={`text-2xl font-bold`}>{data?.fullname}</p>
             <p className={`text-dark-text-secondary mt-1 text-sm`}>
               +6281234567890
             </p>
@@ -44,16 +47,32 @@ export default function StudentDetail() {
             >
               {toTitleCase(data.status)}
             </Chip> */}
-            <label className="inline-flex items-center gap-2  cursor-pointer  w-full mt-1">
+
+            {/* <label className="inline-flex items-center gap-2  cursor-pointer  w-full mt-1">
               <input type="checkbox" value="" className="sr-only peer" />
               <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none  rounded-full peer dark:bg-error  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white  after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-dark-success"></div>
               <div className="text-sm font-medium text-gray-900 dark:text-gray-300">
                 Active
               </div>
-            </label>
-          </div>
+            </label> */}
+          </div>{" "}
+          {/* <button
+            onClick={() => {
+              router.push(`/students/edit/${params.id}`);
+            }}
+            className={`text-dark-primary`}
+          >
+            <BiEdit className={`size-6`} />
+          </button> */}
         </div>
-        <div>Edit</div>
+        <button
+          onClick={() => {
+            router.push(`/students/edit/${params.id}`);
+          }}
+          className={`mt-4 w-full bg-dark-primary active:bg-dark-primary/70 rounded-lg px-3 py-1 flex items-center justify-center`}
+        >
+          Edit Data
+        </button>
       </div>
       {/* Payment Info */}
       <div className={`relative flex flex-col bg-dark-surface rounded-lg p-4 `}>

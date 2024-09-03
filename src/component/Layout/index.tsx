@@ -1,10 +1,21 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import Navbar from "../Navbar";
 import NavigationBottom from "../NavigationBottom";
+import { useEffect } from "react";
+import { localStorageMixins } from "@/utils/localStorageMixins";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  if (pathname === "/login") {
+    return children;
+  }
+  useEffect(() => {
+    const access_token = localStorageMixins.get(`access_token`);
+    if (!access_token && !pathname.includes(`/login`)) {
+      redirect("/login");
+    }
+  }, []);
   return (
     <div className={`w-full`}>
       <Navbar />

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Layout from "@/component/Layout";
 import Navbar from "@/component/Navbar";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,15 +18,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={
-          inter.className + `w-screen dark:bg-dark-background `
-        }
-      >
-        {/* <Navbar /> */}
-        <Layout>{children}</Layout>
-      </body>
-    </html>
+    <GoogleOAuthProvider
+      clientId={
+        "771963944350-kq86tumrbh49irvbpq3h15bdki0rm9qo.apps.googleusercontent.com"
+      }
+    >
+      <html lang="en">
+        <body className={inter.className + `w-screen dark:bg-dark-background `}>
+          {/* <Navbar /> */}
+          <Layout>{children}</Layout>
+        </body>
+      </html>
+    </GoogleOAuthProvider>
   );
 }
