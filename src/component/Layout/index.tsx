@@ -7,12 +7,12 @@ import { localStorageMixins } from "@/utils/localStorageMixins";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  useEffect(() => {
-    const access_token = localStorageMixins.get(`access_token`);
-    if (!access_token && !pathname.includes(`/login`)) {
-      redirect("/login");
-    }
-  }, []);
+  // useEffect(() => {
+  //   const access_token = localStorageMixins.get(`access_token`);
+  //   if (!access_token && !pathname.includes(`/login`)) {
+  //     redirect("/login");
+  //   }
+  // }, []);
   if (pathname === "/login") {
     return children;
   }
