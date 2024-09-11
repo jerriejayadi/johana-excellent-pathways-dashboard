@@ -18,11 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <GoogleOAuthProvider
-      clientId={
-        "771963944350-kq86tumrbh49irvbpq3h15bdki0rm9qo.apps.googleusercontent.com"
-      }
-    >
+    <GoogleOAuthProvider clientId={process.env.GOOGLE_OAUTH_CLIENT_ID ?? ""}>
       <html lang="en">
         <body className={inter.className + `w-screen dark:bg-dark-background `}>
           {/* <Navbar /> */}
