@@ -2,9 +2,12 @@ import { useState } from "react";
 import Input from "../Input";
 import Modal, { ModalProps } from "../Modal";
 import { CgSpinner } from "react-icons/cg";
+import { useRequest } from "ahooks";
+import { postAttendance } from "@/service/attendance_module";
 
 interface AddAttendanceModalProps extends ModalProps {
   onSuccess: () => void;
+  id: string;
 }
 
 export default function AddAttendanceModal({
@@ -13,15 +16,22 @@ export default function AddAttendanceModal({
   const [date, setDate] = useState<any>("");
   const [isLoading, setLoading] = useState<boolean>(false);
 
+  const { runAsync, loading } = useRequest(postAttendance, { manual: true });
+
   const handleSubmit = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      props.onClose();
+    runAsync({ studentId: props.id, dateOfAttendance: date }).then((res) => {
+      console.log(res);
       setDate("");
       props.onSuccess();
-    }, 3000);
+    });
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   props.onClose();
+    //   setDate("");
+    //   props.onSuccess();
+    // }, 3000);
   };
+
   return (
     <Modal {...props}>
       <Input
@@ -32,17 +42,17 @@ export default function AddAttendanceModal({
         id={`attendance-date`}
         label={`Tanggal Masuk`}
         className={`appearance-none accent-dark-text`}
-        type={`date`}
+        type={`datetime-local`}
         placeholder={`DD/MM/YYYY`}
       />
       <button
-        disabled={date === "" || isLoading}
+        disabled={date === "" || loading}
         onClick={() => {
           handleSubmit();
         }}
         className={`bg-dark-primary w-full py-3 rounded-lg mt-4 active:bg-dark-primary/70 transition-all duration-150 disabled:bg-gray-600 flex items-center justify-center `}
       >
-        {isLoading ? (
+        {loading ? (
           <CgSpinner className={`size-6 animate-spin`} />
         ) : (
           "Tambah Presensi"

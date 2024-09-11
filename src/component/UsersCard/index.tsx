@@ -2,12 +2,13 @@ import Image from "next/image";
 import { BiChevronRight } from "react-icons/bi";
 import Chip from "../Chip";
 import { toTitleCase, translateColorChips } from "@/utils";
+import { EGender, EStatusStudent } from "@/types";
 
 interface UsersCard {
   fullname: string;
-  gender: string;
+  gender: EGender;
   className?: string;
-  status: "active" | "inactive";
+  status: EStatusStudent;
   onClick: () => void;
 }
 
@@ -28,7 +29,7 @@ export default function UsersCard({
       <div className={`flex items-center gap-3 shrink-0`}>
         <Image
           alt={``}
-          src={gender === "male" ? `/icons/male.png` : `/icons/female.png`}
+          src={gender === EGender.MALE ? `/icons/male.png` : `/icons/female.png`}
           className={`size-14 shrink-0`}
           width={1000}
           height={1000}

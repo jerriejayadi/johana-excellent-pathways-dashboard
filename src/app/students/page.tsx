@@ -1,6 +1,7 @@
 "use client";
 import UsersCard from "@/component/UsersCard";
-import { getStudents } from "@/service/students";
+import { getStudents } from "@/service/students_module";
+import { EGender, EStatusStudent } from "@/types";
 import { useRequest } from "ahooks";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -83,15 +84,15 @@ export default function Students() {
       </button>
       {/* Cards */}
       <div className={`flex flex-col gap-3`}>
-        {data?.result.map((rows, index) => (
+        {data?.result?.items?.map((rows, index) => (
           <UsersCard
             key={`students-${index + 1}`}
             onClick={() => {
               router.push(`/students/${rows.id}`);
             }}
-            fullname={rows.fullname}
-            gender={rows.gender}
-            status={rows.status}
+            fullname={rows.name}
+            gender={rows.gender as EGender}
+            status={rows.status as EStatusStudent}
           />
         ))}
       </div>

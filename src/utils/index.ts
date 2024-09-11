@@ -1,3 +1,5 @@
+import { EStatusStudent } from "@/types";
+
 export const toTitleCase = (str: string) => {
   // Replace underscores with spaces and convert to lowercase
   const normalized = str.replace(/_/g, " ").toLowerCase();
@@ -16,7 +18,9 @@ export const toTitleCase = (str: string) => {
 export const translateColorChips = (status: string) => {
   switch (status) {
     case "active":
+    case EStatusStudent.ACTIVE:
       return "success";
+    case EStatusStudent.INACTIVE:
     case "inactive":
       return "error";
     default:

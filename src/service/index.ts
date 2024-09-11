@@ -1,3 +1,4 @@
+import { localStorageMixins } from "@/utils/localStorageMixins";
 import axios from "axios";
 
 // import { baseUrl } from './constants';
@@ -18,18 +19,20 @@ const apiClient = axios.create({
 // apiClient.defaults.headers.common["X-Api-Key"] = apiKey ?? "";
 apiClient.interceptors.request.use;
 
-// apiClient.interceptors.request.use(
-//   async (config: any) => {
-//     const token = getCookie("access_token") as string;
-//     if (token) {
-//       config.headers!.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
+apiClient.interceptors.request.use(
+  async (config: any) => {
+    const token = localStorageMixins
+      .get("access_token")
+      ?.replaceAll('"', "") as string;
+    if (token) {
+      config.headers!.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 apiClient.interceptors.response.use(
   (resp) => {
@@ -38,7 +41,7 @@ apiClient.interceptors.response.use(
   (error) => {
     // In case of status 401 user will redirect to login page because of token expire
     if (error?.response?.status === 401) {
-      window.location.href = "/authenticate";
+      // window.location.href = "/authenticate";
       //   deleteCookie("access_token");
     }
     return Promise.reject(error);

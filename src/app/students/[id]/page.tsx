@@ -3,12 +3,15 @@ import AddAttendanceModal from "@/component/AddAttendanceModal";
 import Chip from "@/component/Chip";
 import Input from "@/component/Input";
 import Modal from "@/component/Modal";
-import { getStudentsDetail } from "@/service/students";
+import { getAttendance } from "@/service/attendance_module";
+import { getStudentsDetail } from "@/service/students_module";
+import { EGender } from "@/types";
 import { translateColorChips, toTitleCase } from "@/utils";
 import { useRequest } from "ahooks";
+import moment from "moment";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BiChevronDown, BiChevronUp, BiEdit } from "react-icons/bi";
 import { PiPlusBold } from "react-icons/pi";
 
@@ -17,7 +20,43 @@ export default function StudentDetail({ params }: { params: { id: string } }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [attendanceModal, setAttendanceModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [filteredAttendance, setFilteredAttendance] =
+    useState<Record<string, { date_of_attendance: string }[]>>();
+
   const { data, run } = useRequest(getStudentsDetail, { manual: true });
+  const { data: attendanceList, runAsync: fetchAttendance } = useRequest(
+    getAttendance,
+    {
+      manual: true,
+    }
+  );
+
+  const handleFetchAttendance = useCallback(() => {
+    fetchAttendance(params.id).then((res) => {
+      // please filter the result based on the date
+      setFilteredAttendance(
+        res.result.reduce((acc, curr) => {
+          const month = new Date(curr.date_of_attendance).toLocaleString(
+            "default",
+            {
+              month: "long",
+              year: "numeric",
+            }
+          );
+          if (!acc[month]) {
+            acc[month] = [];
+          }
+          acc[month].push(curr as any);
+          return acc;
+        }, {} as Record<string, { date_of_attendance: string }[]>)
+      );
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(filteredAttendance);
+  }, [filteredAttendance]);
+
   useEffect(() => {
     run(params.id);
   }, []);
@@ -30,14 +69,16 @@ export default function StudentDetail({ params }: { params: { id: string } }) {
           <Image
             alt={``}
             src={
-              data?.gender === "male" ? `/icons/male.png` : `/icons/female.png`
+              data?.result?.gender === EGender.MALE
+                ? `/icons/male.png`
+                : `/icons/female.png`
             }
             className={`size-14 shrink-0`}
             width={1000}
             height={1000}
           />
           <div className={`w-full`}>
-            <p className={`text-2xl font-bold`}>{data?.fullname}</p>
+            <p className={`text-2xl font-bold`}>{data?.result?.name}</p>
             <p className={`text-dark-text-secondary mt-1 text-sm`}>
               +6281234567890
             </p>
@@ -89,6 +130,9 @@ export default function StudentDetail({ params }: { params: { id: string } }) {
         <div
           onClick={() => {
             setIsOpen(!isOpen);
+            if (!isOpen) {
+              handleFetchAttendance();
+            }
           }}
           className={`relative px-4 py-3 md:hover:cursor-pointer`}
         >
@@ -106,34 +150,26 @@ export default function StudentDetail({ params }: { params: { id: string } }) {
         </div>
         {isOpen && (
           <div className="p-4 flex flex-col gap-6 ">
-            <div>
-              <p className={`font-semibold mb-1`}>Agustus 2024</p>
-              <div className={`ml-4`}>
-                <p>29 Agustus 2024</p>
-                <p>26 Agustus 2024</p>
-                <p>22 Agustus 2024</p>
-                <p>19 Agustus 2024</p>
-                <p>15 Agustus 2024</p>
-                <p>12 Agustus 2024</p>
-                <p>8 Agustus 2024</p>
-                <p>5 Agustus 2024</p>
-                <p>1 Agustus 2024</p>
-              </div>
-            </div>
-            <div>
-              <p className={`font-semibold mb-1`}>Juli 2024</p>
-              <div className={`ml-4`}>
-                <p>29 Juli 2024</p>
-                <p>25 Juli 2024</p>
-                <p>22 Juli 2024</p>
-                <p>18 Juli 2024</p>
-                <p>15 Juli 2024</p>
-                <p>11 Juli 2024</p>
-                <p>8 Juli 2024</p>
-                <p>4 Juli 2024</p>
-                <p>1 Juli 2024</p>
-              </div>
-            </div>
+            {filteredAttendance ? (
+              Object.entries(filteredAttendance!).map(
+                ([month, attendanceArray]) => (
+                  <div key={month}>
+                    <p className={`font-semibold mb-1`}>{month}</p>
+                    <div className={`ml-4`}>
+                      {attendanceArray.map((rows, index) => (
+                        <p key={`attendance-${month}-${index}`}>
+                          {moment(rows.date_of_attendance).format(
+                            "D MMMM YYYY"
+                          )}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )
+            ) : (
+              <p className={`italic`}>No Attendance Available</p>
+            )}
           </div>
         )}
       </div>
@@ -146,12 +182,16 @@ export default function StudentDetail({ params }: { params: { id: string } }) {
         <PiPlusBold className={`size-6`} />
       </button>
       <AddAttendanceModal
+        id={params.id}
         title={`Attendance`}
         isOpen={attendanceModal}
         onClose={function (): void {
           setAttendanceModal(false);
         }}
-        onSuccess={() => {}}
+        onSuccess={() => {
+          setAttendanceModal(false);
+          handleFetchAttendance();
+        }}
       />
     </div>
   );

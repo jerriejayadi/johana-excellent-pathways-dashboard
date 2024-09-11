@@ -1,4 +1,6 @@
 "use client";
+import Modal from "@/component/Modal";
+import { postAdminGoogle } from "@/service/admin_module";
 import { localStorageMixins } from "@/utils/localStorageMixins";
 import { useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
@@ -7,7 +9,11 @@ import { useEffect, useState } from "react";
 
 export default function Login() {
   const router = useRouter();
-  const [access_token, setAccessToken] = useState<string>("");
+
+  const [access_token, setAccessToken] = useState<string>(""),
+    [failedModal, setFailedModal] = useState<boolean>(false),
+    [errorMessage, setErrorMessage] = useState<any>();
+
   const googleLogin = useGoogleLogin({
     onSuccess: (credentialResponse) => {
       onSuccessGoogleLogin(credentialResponse);
@@ -24,26 +30,22 @@ export default function Login() {
     try {
       // code request to backend
       const tokenGoogle = googleResponse?.access_token;
-      setAccessToken(tokenGoogle);
-      localStorageMixins.set(`access_token`, tokenGoogle);
-      // PostLoginGoogle({ token: tokenGoogle })
-      //   .then((res) => {
-      //     localStorageMixins.set("access_token", res.result.access_token);
-      //     localStorageMixins.set("profile", res.result.profile);
-      //     setAccessToken(res.result.access_token);
-      //   })
-      //   .catch((error) => {
-      //     console.log(error);
-      //     setFailedModal(true);
-      //     setErrorMessage(error);
-      //   });
+      postAdminGoogle({ token: tokenGoogle })
+        .then((res) => {
+          localStorageMixins.set("access_token", res.result.access_token);
+          localStorageMixins.set("profile", res.result.profile);
+          setAccessToken(res.result.access_token);
+        })
+        .catch((error) => {
+          setFailedModal(true);
+          console.log(error);
+          setErrorMessage(error);
+        });
     } catch (error) {
       // catch some error
     }
   };
-  const handleLogin = () => {
-    router.push(`/`);
-  };
+
   useEffect(() => {
     if (localStorageMixins.get(`access_token`)) {
       router.push("/");
@@ -77,6 +79,38 @@ export default function Login() {
           <p>Sign in with Google</p>
         </button>
       </div>
+      <Modal
+        isOpen={failedModal}
+        onClose={function (): void {
+          setFailedModal(false);
+        }}
+        withCloseButton={false}
+      >
+        <div className={`flex flex-col items-center justify-center`}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            className="size-24 fill-error"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
+          </svg>
+
+          <p className={`text-2xl font-bold text-dark-text mt-6`}>
+            Failed to Login!
+          </p>
+          <p className={`text-dark-text-secondary mt-2`}>
+            Error {errorMessage?.status} -{" "}
+            {errorMessage?.response?.data?.message}
+          </p>
+        </div>
+      </Modal>
     </main>
   );
 }
